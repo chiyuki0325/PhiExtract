@@ -65,7 +65,7 @@ async def extract_single_file(asset_file, filename_map, output_dir):
                         output_chunk = ffmpeg_process.stdout.read(1024)
                         output_stream.write(output_chunk)
                     output_stream.seek(0)
-                    await ffmpeg_process.wait()
+                    ffmpeg_process.wait()
                     with open(output_file.with_suffix('.ogg'), 'wb') as f:
                         f.write(output_stream.read())
         elif target_filename.endswith('.png'):
