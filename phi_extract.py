@@ -38,6 +38,10 @@ async def extract_single_file(asset_file, filename_map, output_dir):
             output_dir / target_filename_parts[2].replace('.', ' - ', 1)[:-2] / target_filename_parts[3]
         output_file.parent.mkdir(parents=True, exist_ok=True)
 
+        if output_file.exists():
+            print(f'{output_file} already exists, skipping ...')
+            return
+
         print(f'Extracting {target_filename} to {output_file} ...')
 
         if target_filename.endswith('.json'):
