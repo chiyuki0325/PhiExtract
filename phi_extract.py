@@ -79,16 +79,6 @@ async def extract_single_file(asset_file, filename_map, output_dir):
                         obj.read().image.save(f)
 
 
-async def make_archive_single_folder(folder):
-    print(f'Compressing {folder} ...')
-    await make_archive(
-        folder.absolute().__str__() + '.zip',
-        'zip',
-        folder
-    )
-    await rmtree(folder)
-
-
 async def main():
     assets_dir: Path = Path(sys.argv[1])
     output_dir: Path = Path(sys.argv[2])
@@ -96,11 +86,6 @@ async def main():
 
     for file in (assets_dir / 'aa/Android').glob('*.bundle'):
         asyncio.create_task(extract_single_file(file, filename_map, output_dir))
-
-    await asyncio.gather(*asyncio.all_tasks())
-
-    for folder in output_dir.glob('*'):
-        asyncio.create_task(make_archive_single_folder(folder))
 
     await asyncio.gather(*asyncio.all_tasks())
 

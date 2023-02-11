@@ -10,7 +10,8 @@ pip install -r requirements.txt
 ```
 
 ```bash
-python3 phi_extract.py <path to assets folder> <path to output directory>
+python3 phi_extract.py <assets folder> <output directory>
+python3 pack.py <output directory>
 ```
 
 You can extract assets folder from the game's APK or OBB file.
