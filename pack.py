@@ -8,7 +8,7 @@ async def main():
     async def make_archive_single_folder(folder):
         print(f'Compressing {folder} ...')
         await make_archive(
-            folder.absolute().__str__() + '.zip',
+            folder.absolute().__str__(),
             'zip',
             folder
         )
