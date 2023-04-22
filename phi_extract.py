@@ -4,7 +4,6 @@ import asyncio
 
 from catalog import Catalog
 
-import ffmpeg
 import UnityPy
 from UnityPy.enums import ClassIDType
 
@@ -40,13 +39,11 @@ async def extract_single_file(asset_file, filename_map, output_dir):
                     wav_data = list(obj.read().samples.values())[0]
                     with open(output_file, 'wb') as f:
                         f.write(wav_data)
-                    ffmpeg_process = (
-                        ffmpeg
-                        .input(output_file, format='wav')
-                        .output(output_file.with_suffix('.ogg'), format='ogg', acodec='libvorbis', loglevel='quiet')
-                        .run_async()
+                    ffmpeg_process = await asyncio.create_subprocess_exec(
+                        'ffmpeg', '-y', '-i', output_file.__str__(), '-acodec', 'libvorbis',
+                        output_file.with_suffix('.ogg').__str__()
                     )
-                    ffmpeg_process.wait()
+                    await ffmpeg_process.wait()
                     output_file.unlink()
         elif target_filename.endswith('.png'):
             for obj in env.objects:

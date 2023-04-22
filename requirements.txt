@@ -1,3 +1,2 @@
 UnityPy
-ffmpeg-python
 aioshutil
