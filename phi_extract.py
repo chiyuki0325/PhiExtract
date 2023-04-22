@@ -1,4 +1,4 @@
-import sys
+import os, sys
 from pathlib import Path
 import asyncio
 
@@ -44,7 +44,7 @@ async def extract_single_file(asset_file, filename_map, output_dir):
                         output_file.with_suffix('.ogg').__str__()
                     )
                     await ffmpeg_process.wait()
-                    output_file.unlink()
+                    os.remove(output_file)
         elif target_filename.endswith('.png'):
             for obj in env.objects:
                 if obj.type == ClassIDType.Texture2D:
