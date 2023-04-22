@@ -57,10 +57,11 @@ async def main():
     output_dir: Path = Path(sys.argv[2])
     filename_map: dict[str, str] = Catalog(open(assets_dir / 'aa/catalog.json', 'r')).fname_map
 
-    for file in (assets_dir / 'aa/Android').glob('*.bundle'):
-        asyncio.create_task(extract_single_file(file, filename_map, output_dir))
+    semaphore = asyncio.Semaphore(8)
 
-    await asyncio.gather(*asyncio.all_tasks())
+    for file in (assets_dir / 'aa/Android').glob('*.bundle'):
+        async with semaphore:
+            await asyncio.create_task(extract_single_file(file, filename_map, output_dir))
 
 
 if __name__ == '__main__':
