@@ -1,27 +1,12 @@
-import os
 import sys
 from pathlib import Path
-from io import BytesIO
-from threading import Thread
 import asyncio
-from aioshutil import make_archive, rmtree
 
 from catalog import Catalog
 
 import ffmpeg
 import UnityPy
 from UnityPy.enums import ClassIDType
-
-
-def ffmpeg_writer(ffmpeg_proc, wav_bytes_arr):
-    chunk_size = 1024
-    n_chunks = len(wav_bytes_arr) // chunk_size
-    remainder_size = len(wav_bytes_arr) % chunk_size
-    for i in range(n_chunks):
-        ffmpeg_proc.stdin.write(wav_bytes_arr[i * chunk_size:(i + 1) * chunk_size])
-    if remainder_size > 0:
-        ffmpeg_proc.stdin.write(wav_bytes_arr[chunk_size * n_chunks:])
-    ffmpeg_proc.stdin.close()
 
 
 async def extract_single_file(asset_file, filename_map, output_dir):
@@ -53,25 +38,16 @@ async def extract_single_file(asset_file, filename_map, output_dir):
             for obj in env.objects:
                 if obj.type == ClassIDType.AudioClip:
                     wav_data = list(obj.read().samples.values())[0]
+                    with open(output_file, 'wb') as f:
+                        f.write(wav_data)
                     ffmpeg_process = (
                         ffmpeg
-                        .input('pipe:', format='wav')
-                        .output('pipe:', format='ogg', acodec='libvorbis', loglevel='quiet')
-                        .run_async(pipe_stdin=True, pipe_stdout=True)
+                        .input(output_file, format='wav')
+                        .output(output_file.with_suffix('.ogg'), format='ogg', acodec='libvorbis', loglevel='quiet')
+                        .run_async()
                     )
-                    output_stream = BytesIO()
-                    ffmpeg_thread = Thread(
-                        target=ffmpeg_writer,
-                        args=(ffmpeg_process, wav_data)
-                    )
-                    ffmpeg_thread.start()
-                    while ffmpeg_thread.is_alive():
-                        output_chunk = ffmpeg_process.stdout.read(1024)
-                        output_stream.write(output_chunk)
-                    output_stream.seek(0)
                     ffmpeg_process.wait()
-                    with open(output_file.with_suffix('.ogg'), 'wb') as f:
-                        f.write(output_stream.read())
+                    output_file.unlink()
         elif target_filename.endswith('.png'):
             for obj in env.objects:
                 if obj.type == ClassIDType.Texture2D:
